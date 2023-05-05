@@ -24,12 +24,11 @@ if uploaded_file is not None:
         int_enc_lst = st.multiselect('Select the categorical columns to be integer-encoded', df.columns)
         one_h_lst = st.multiselect('Select the categorical columns to be one-hot-encoded', df.columns)
 
-        
         feature_type_df = hf.feature_type_extraction(df, index_columns=idx_cols, categorical_columns=int_enc_lst+one_h_lst) 
-        #feature_type_df
+        st.write(feature_type_df)
         index_cols = feature_type_df['Index'].dropna().tolist()
         numeric_cols = feature_type_df['Numeric'].dropna().tolist()
-        categorical_cols = feature_type_df['Categorical'].dropna().tolist()
+        categorical_cols = feature_type_df['Categorical/Ordinal'].dropna().tolist()
 
         
         try:
