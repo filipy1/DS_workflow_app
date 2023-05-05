@@ -17,23 +17,41 @@ if uploaded_file is not None:
     try:
         ## We create a dataframe with the feature type and old vs new name, also we renamed the columns for consistency later on.
         idx_cols = st.multiselect('Select the index columns', df.columns)
-        manual_cate_cols = st.multiselect('Select the categorical columns', df.columns)
+        #manual_cate_cols = st.multiselect('Select the categorical columns', df.columns)
         df.set_index(idx_cols, inplace=True, drop=True)
 
-        feature_type_df = hf.feature_type_extraction(df, index_columns=idx_cols, categorical_columns=manual_cate_cols) 
+        ## We encode the categorical columns
+        int_enc_lst = st.multiselect('Select the categorical columns to be integer-encoded', df.columns)
+        one_h_lst = st.multiselect('Select the categorical columns to be one-hot-encoded', df.columns)
+
+        
+        feature_type_df = hf.feature_type_extraction(df, index_columns=idx_cols, categorical_columns=int_enc_lst+one_h_lst) 
         #feature_type_df
         index_cols = feature_type_df['Index'].dropna().tolist()
         numeric_cols = feature_type_df['Numeric'].dropna().tolist()
         categorical_cols = feature_type_df['Categorical'].dropna().tolist()
 
-        old_cols = df.columns.tolist()
-        st.write('Renaming the columns for consistency -')
-        df.columns = ['N' + str(i) if df.columns[i] in numeric_cols else 'C' + str(i) for i in range(0, len(df.columns))]
+        
+        try:
+            df = hf.categorical_column_encoding(df, categorical_columns=int_enc_lst, encoding_type='ordinal')
+            df = hf.categorical_column_encoding(df, categorical_columns=one_h_lst, encoding_type='one-hot')
+            st.write(df.head())
 
-        st.write(pd.DataFrame({'Old column names: ': old_cols, 'New column names: ': df.columns, 'Column types: ': df.dtypes.tolist()}))
+        except BaseException as e:
+            st.error(e)
 
-        st.write(df.describe(include='all'))
+        # old_cols = df.columns.tolist()
+        # st.write('Renaming the columns for consistency -')
+        # df.columns = ['N' + str(i) if df.columns[i] in numeric_cols else 'C' + str(i) for i in range(0, len(df.columns))]
 
+        # st.write(pd.DataFrame({'Old column names: ': old_cols, 'New column names: ': df.columns, 'Column types: ': df.dtypes.tolist()}))
+
+        # st.write(df.describe(include='all'))
+
+        # st.write(df.head())
+
+
+        
     except ValueError as v:
         st.error(v)
 
@@ -41,3 +59,5 @@ if uploaded_file is not None:
         hf.download_button(df)
     except NameError as e:
         st.error(e)
+
+

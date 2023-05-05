@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-
+from sklearn.preprocessing import OrdinalEncoder
 
 def feature_type_extraction(df, index_columns=[0], categorical_columns=[]):
     """This function takes the uploaded file and returns a dictionary with the feature type as the key and the list of column names as the value."""
@@ -25,3 +25,23 @@ def download_button(df):
     if st.button("Download the datafream as a CSV file"):
         df.to_csv(file_name + '.csv')
         st.success('Dataframe saved as a CSV file.')
+
+
+def categorical_column_encoding(df, categorical_columns=[], encoding_type='ordinal'):
+    """This function takes the dataframe and a column of categorical data and returns the df with the encoded column."""
+
+    if encoding_type == 'ordinal':
+        enc = OrdinalEncoder()
+        enc.fit(df.loc[:, categorical_columns])
+        df[categorical_columns] = enc.transform(df.loc[:, categorical_columns])
+
+        return df
+    
+    if encoding_type == 'one-hot':
+        df = pd.get_dummies(df, columns=categorical_columns, prefix=categorical_columns, drop_first=True)
+
+        return df
+    else:
+
+        return df
+    
