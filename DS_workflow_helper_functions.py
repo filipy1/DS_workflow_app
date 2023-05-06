@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.impute import KNNImputer
+from sklearn.experimental import enable_iterative_imputer
+from sklearn.impute import IterativeImputer
 
 def feature_type_extraction(df, index_columns=[0], categorical_columns=[]):
     """This function takes the uploaded file and returns a dictionary with the feature type as the key and the list of column names as the value."""
@@ -47,7 +49,7 @@ def categorical_column_encoding(df, categorical_columns=[], encoding_type='ordin
         return df
     
 
-def imputation(df, imputation_type='mean', columns=[], knn_k=5):
+def imputation(df, imputation_type='mean', columns=[], knn_k=5, initial_strategy='mean', n_nearest_features=5, imp_order='ascending'):
     """This function takes the dataframe and a column of categorical data and returns the df with the encoded column."""
 
     if imputation_type == 'mean':
@@ -70,7 +72,12 @@ def imputation(df, imputation_type='mean', columns=[], knn_k=5):
         df.loc[:, columns] = imputer.fit_transform(df.loc[:, columns])
 
         return df
-    
+
+    if imputation_type == 'iter':
+        iter_imp = IterativeImputer(initial_strategy=initial_strategy, n_nearest_features=n_nearest_features, random_state=42, imputation_order=imp_order)
+        df.loc[:, columns] = iter_imp.fit_transform(df.loc[:, columns])
+
+        return df
     else:
 
         return df
