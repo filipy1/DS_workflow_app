@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OrdinalEncoder
+from sklearn.impute import KNNImputer
 
 def feature_type_extraction(df, index_columns=[0], categorical_columns=[]):
     """This function takes the uploaded file and returns a dictionary with the feature type as the key and the list of column names as the value."""
@@ -45,3 +46,31 @@ def categorical_column_encoding(df, categorical_columns=[], encoding_type='ordin
 
         return df
     
+
+def imputation(df, imputation_type='mean', columns=[], knn_k=5):
+    """This function takes the dataframe and a column of categorical data and returns the df with the encoded column."""
+
+    if imputation_type == 'mean':
+        df.loc[:, columns] = df.loc[:, columns].fillna(df[columns].mean())
+
+        return df
+    
+    if imputation_type == 'median':
+        df.loc[:, columns] = df.loc[:, columns].fillna(df[columns].median())
+
+        return df
+    
+    if imputation_type == 'mode':
+        df.loc[:, columns] = df.loc[:, columns].fillna(df[columns].mode())
+
+        return df
+    
+    if imputation_type == 'knn':
+        imputer = KNNImputer(n_neighbors=knn_k)
+        df.loc[:, columns] = imputer.fit_transform(df.loc[:, columns])
+
+        return df
+    
+    else:
+
+        return df
