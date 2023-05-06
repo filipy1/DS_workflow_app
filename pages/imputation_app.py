@@ -62,7 +62,7 @@ if uploaded_file is not None: ## If the user has uploaded a file
 
         if iter_impute == 'Yes':
             #n_nearest = col6.slider('Select the number of nearest feautres to use for imputation', min_value=1, max_value=len(df.columns), value=int(np.sqrt(len(df.columns))), step=1)
-            init_strategy = col7.radio('Select the initial imputation strategy', ['mean', 'median', 'mode'])
+            init_strategy = col7.radio('Select the initial imputation strategy', ['mean', 'median', 'most_frequent'])
             imp_order = col8.radio('Select the order of imputation', ['ascending', 'descending', 'random'])
             df = hf.imputation(df, imputation_type='iter', columns=iter_impute, initial_strategy=init_strategy, imp_order=imp_order)
 
@@ -78,7 +78,6 @@ if uploaded_file is not None: ## If the user has uploaded a file
         s = buffer.getvalue()
 
         col3.text(s)
-
     except BaseException as e:
         st.error(e)
 

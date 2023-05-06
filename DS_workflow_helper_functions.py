@@ -64,7 +64,7 @@ def imputation(df, imputation_type='mean', columns=[], knn_k=5, initial_strategy
         return df
     
     if imputation_type == 'mode':
-        df.loc[:, columns] = df.loc[:, columns].fillna(df[columns].mode())
+        df.loc[:, columns] = df.loc[:, columns].fillna(list(df[columns].mode())[0])
 
         return df
     
