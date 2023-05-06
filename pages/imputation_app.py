@@ -4,7 +4,7 @@ import numpy as np
 import DS_workflow_helper_functions as hf
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
-
+import io
 
 
 
@@ -23,6 +23,10 @@ if uploaded_file is not None: ## If the user has uploaded a file
 
 
     try:
+
+        ## Index column selection
+        idx_cols = st.multiselect('Select the index columns', df.columns)
+        df.set_index(idx_cols, inplace=True, drop=True)
         ## present the dataframe
         st.subheader("""Presenting top 5 rows and summary statistics of the dataframe""")
         col1, col2 = st.columns(2)
@@ -44,8 +48,6 @@ if uploaded_file is not None: ## If the user has uploaded a file
         if len(simple_impute) > 0: 
             imp_type = col2.radio('Select the type of simple imputation', ['mean', 'median', 'mode'])
             df = hf.imputation(df, imputation_type=imp_type, columns=simple_impute)
-            st.write(df.head())
-
 
         col3, col4 = st.columns(2)
         knn_impute = col3.multiselect('Select the columns to be knn imputed', [col for col in df.columns if col not in simple_impute+col_drop_lst])
@@ -53,21 +55,29 @@ if uploaded_file is not None: ## If the user has uploaded a file
         if len(knn_impute) > 0:
             knn_k = col4.slider('Select the number of nearest neighbors', min_value=1, max_value=len(df.index), value=int(np.sqrt(len(df.index))), step=1)
             df = hf.imputation(df, imputation_type='knn', columns=knn_impute, knn_k=knn_k)
-            st.write(df.head())
 
         ## Iterative imputer using bayesian ridge regression.
         col5, col6, col7, col8 = st.columns(4)
-        iter_impute = col5.multiselect('Select the columns to be iterative imputed', [col for col in df.columns if col not in simple_impute + knn_impute+col_drop_lst])
+        iter_impute = col5.radio('Iter impute rest of the columns?', ['No', 'Yes'])
 
-        if len(iter_impute) > 0:
-            n_nearest = col6.slider('Select the number of nearest feautres to use for imputation', min_value=1, max_value=len(df.columns), value=int(np.sqrt(len(df.columns))), step=1)
+        if iter_impute == 'Yes':
+            #n_nearest = col6.slider('Select the number of nearest feautres to use for imputation', min_value=1, max_value=len(df.columns), value=int(np.sqrt(len(df.columns))), step=1)
             init_strategy = col7.radio('Select the initial imputation strategy', ['mean', 'median', 'mode'])
             imp_order = col8.radio('Select the order of imputation', ['ascending', 'descending', 'random'])
-            df = hf.imputation(df, imputation_type='iterative', columns=iter_impute, n_nearest_features=n_nearest, initial_strategy=init_strategy, imp_order=imp_order)
-            st.write(df.head())
+            df = hf.imputation(df, imputation_type='iter', columns=iter_impute, initial_strategy=init_strategy, imp_order=imp_order)
 
 
-        st.write(df.isna().sum())
+        ## We present the dataframe
+        st.subheader("""Presenting top 5 rows and summary statistics of the dataframe""")
+        col1, col2, col3 = st.columns(3)
+        col1.write(df.head())
+        col2.write(df.describe(include='all'))
+
+        buffer = io.StringIO()
+        df.info(buf=buffer)
+        s = buffer.getvalue()
+
+        col3.text(s)
 
     except BaseException as e:
         st.error(e)
