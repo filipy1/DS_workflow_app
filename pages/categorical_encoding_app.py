@@ -36,7 +36,7 @@ if uploaded_file is not None: ## If the user has uploaded a file
         df.set_index(idx_cols, inplace=True, drop=True)
 
         ## We encode the categorical columns
-        cat_lst = st.multiselect('Select the categorical columns', df.columns)
+        cat_lst = st.multiselect('Select the categorical columns', df.columns, default=list(df.select_dtypes(include=["object", 'datetime', 'timedelta'])))
 
         feature_type_df = hf.feature_type_extraction(df, index_columns=idx_cols, categorical_columns=cat_lst)
         st.write(feature_type_df)

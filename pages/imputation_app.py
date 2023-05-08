@@ -56,7 +56,7 @@ if uploaded_file is not None: ## If the user has uploaded a file
             knn_k = col4.slider('Select the number of nearest neighbors', min_value=1, max_value=len(df.index), value=int(np.sqrt(len(df.index))), step=1)
             df = hf.imputation(df, imputation_type='knn', columns=knn_impute, knn_k=knn_k)
 
-        ## Iterative imputer using bayesian ridge regression.
+        ## Iterative imputer using bayesian ridge regression, note the implementation is exprimental in sklearn.`
         col5, col6, col7, col8 = st.columns(4)
         iter_impute = col5.radio('Iter impute rest of the columns?', ['No', 'Yes'])
 

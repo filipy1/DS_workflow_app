@@ -15,7 +15,7 @@ def feature_type_extraction(df, index_columns=[0], categorical_columns=[]):
     indexes = pd.DataFrame(index_columns)
     numer = pd.DataFrame(list(df.select_dtypes(include=["float64", "int64"]).columns))
     numer.replace(index_columns + categorical_columns, np.nan, inplace=True)
-    cate = pd.DataFrame(list(df.select_dtypes(include=["object", 'datetime', 'timedelta']).columns) + categorical_columns).drop_duplicates()
+    cate = pd.DataFrame(categorical_columns).drop_duplicates()
     if len(categorical_columns) == 0:
         cate = pd.DataFrame([np.nan for i in range(len(numer))])
 
