@@ -32,7 +32,7 @@ if uploaded_file is not None: ## If the user has uploaded a file
     try:
         ## We create a dataframe with the feature type and old vs new name, also we renamed the columns for consistency later on.
         idx_cols = st.multiselect('Select the index columns', df.columns)
-        #manual_cate_cols = st.multiselect('Select the categorical columns', df.columns)
+
         df.set_index(idx_cols, inplace=True, drop=True)
 
         ## We encode the categorical columns

@@ -5,7 +5,8 @@ from sklearn.preprocessing import OrdinalEncoder
 from sklearn.impute import KNNImputer
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
-import io 
+from sklearn.impute import SimpleImputer
+
 
 def feature_type_extraction(df, index_columns=[0], categorical_columns=[]):
     """This function takes the uploaded file and returns a dictionary with the feature type as the key and the list of column names as the value."""
@@ -23,7 +24,7 @@ def feature_type_extraction(df, index_columns=[0], categorical_columns=[]):
     feature_type_df.columns = ["Index", "Numeric", "Categorical/Ordinal"]
     feature_type_df.fillna(np.nan, inplace=True)
 
-    return feature_type_df
+    return feature_type_df.fillna(np.nan)
 
 #@st.cache_data
 def csv_download_button(df):
@@ -53,18 +54,12 @@ def categorical_column_encoding(df, categorical_columns=[], encoding_type='ordin
 def imputation(df, imputation_type='mean', columns=[], knn_k=5, initial_strategy='mean', n_nearest_features=None, imp_order='ascending'):
     """This function takes the dataframe and a column of categorical data and returns the df with the encoded column."""
 
-    if imputation_type == 'mean':
-        df.loc[:, columns] = df.loc[:, columns].fillna(df[columns].mean())
-
-        return df
-    
-    if imputation_type == 'median':
-        df.loc[:, columns] = df.loc[:, columns].fillna(df[columns].median())
-
-        return df
-    
-    if imputation_type == 'mode':
-        df.loc[:, columns] = df.loc[:, columns].fillna(list(df[columns].mode())[0])
+    if imputation_type in ['mean', 'median', 'most frequent']:
+        if imputation_type == 'most frequent':
+            imputation_type = 'most_frequent'
+        imputer = SimpleImputer(strategy=imputation_type)
+        imputed = pd.DataFrame(imputer.fit_transform(df), columns=df.columns)
+        df.loc[:, columns] = imputed.loc[:, columns]
 
         return df
     

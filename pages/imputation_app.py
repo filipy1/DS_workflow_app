@@ -7,6 +7,17 @@ from sklearn.impute import IterativeImputer
 import io
 
 
+st.header("""
+        Upload your data for an imputation process that includes - \n
+        1. Dropping rows based on number of non-NA values
+        2. Dropping columns of your choosing
+        3. Several Simple imputation methods
+        4. KNN imputation
+        5. The scikit-learn experimental IterativeImputer
+        6. Summary statistics of the dataframe after the process
+        7. Download the modified dataframe as a CSV file that can be used in the next pages""") 
+
+
 
 st.subheader('Upload your data')
 
@@ -46,7 +57,7 @@ if uploaded_file is not None: ## If the user has uploaded a file
         simple_impute = col1.multiselect('Select the columns to be simple-imputed', [col for col in df.columns if col not in col_drop_lst])
 
         if len(simple_impute) > 0: 
-            imp_type = col2.radio('Select the type of simple imputation', ['mean', 'median', 'mode'])
+            imp_type = col2.radio('Select the type of simple imputation', ['mean', 'median', 'most frequent'])
             df = hf.imputation(df, imputation_type=imp_type, columns=simple_impute)
 
         col3, col4 = st.columns(2)
