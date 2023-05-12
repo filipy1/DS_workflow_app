@@ -38,6 +38,8 @@ if uploaded_file is not None: ## If the user has uploaded a file
         col1, col2 = st.columns(2)
         col1.write(df.head())
         col2.write(df.describe(include='all'))
+
+        ## Outlier detection/removal methods
         
 
         
@@ -48,7 +50,7 @@ if uploaded_file is not None: ## If the user has uploaded a file
     
     
     try:
-        ## We download the dataframe as a CSV file
+        ## We download the dataframe as a CSV file 
         hf.csv_download_button(df)
     except NameError as e:
         st.error(e)
