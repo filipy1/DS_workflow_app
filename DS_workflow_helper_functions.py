@@ -78,3 +78,32 @@ def imputation(df, imputation_type='mean', columns=[], knn_k=5, initial_strategy
     else:
 
         return df
+    
+def scaling(df, sclaing_type='min-max', columns=[], range=(0, 1)):
+    """This function takes the dataframe and a column of categorical data and returns the df with the encoded column."""
+
+    if columns == []:
+        columns = df.columns
+
+    if sclaing_type == 'min-max': ## min-max scaling with flexible range
+        df.loc[:, columns] = (df.loc[:, columns] - df.loc[:, columns].min()) / ((df.loc[:, columns].max() - df.loc[:, columns].min()) * (range[1] - range[0]))
+    
+        return df
+    
+    if sclaing_type == 'z-score': ## z-score normalization
+        df.loc[:, columns] = (df.loc[:, columns] - df.loc[:, columns].mean()) / df.loc[:, columns].std()
+
+        return df
+    
+    if sclaing_type == 'max-abs': ## max-abs scaling
+        df.loc[:, columns] = df.loc[:, columns] / df.loc[:, columns].abs().max()
+
+        return df
+    
+    if sclaing_type == 'robust': ## robust scaling
+        df.loc[:, columns] = (df.loc[:, columns] - df.loc[:, columns].median()) / (df.loc[:, columns].quantile(0.75) - df.loc[:, columns].quantile(0.25))
+
+        return df
+    
+    else:
+        return df

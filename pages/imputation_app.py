@@ -8,7 +8,8 @@ import io
 
 
 st.header("""
-        Upload your data for an imputation process that includes - \n
+        Data Imputation Application \n
+        Features - \n
         1. Dropping rows based on number of non-NA values
         2. Dropping columns of your choosing
         3. Several Simple imputation methods

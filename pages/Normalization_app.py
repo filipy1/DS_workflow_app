@@ -3,17 +3,15 @@ import pandas as pd
 import DS_workflow_helper_functions as hf
 
 
+st.header("""
+        Data Scaling Application \n
+        Features - \n
+        1. Min-Max
+        2. Z-Score
+        3. Max-Abs
+        4. Robust
+        5. Leaving the option for not scaling some columns""")
 
-
-# st.header("""
-#         Upload your data for a Normalization process that includes - \n
-#         1. Dropping rows based on number of non-NA values
-#         2. Dropping columns of your choosing
-#         3. Several Simple imputation methods
-#         4. KNN imputation
-#         5. The scikit-learn experimental IterativeImputer
-#         6. Summary statistics of the dataframe after the process
-#         7. Download the modified dataframe as a CSV file that can be used in the next pages""") 
 
 
 
@@ -39,6 +37,28 @@ if uploaded_file is not None: ## If the user has uploaded a file
         col1.write(df.head())
         col2.write(df.describe(include='all'))
         
+
+        ## Sclaing the data frame
+        st.subheader("""Scaling the dataframe""")
+        col1, col2 = st.columns(2)
+        scaling_type = col1.selectbox('Select the scaling type', ['Min-Max', 'Z-Score', 'Max-Abs', 'Robust'])
+
+        col2.write("Leaving the option for not scaling some columns, this is unrecommended in most cases")
+        columns_to_scale = col2.multiselect('Select the columns to scale', df.columns) ## We get the columns to scale
+        
+        if scaling_type.lower() == 'min-max':
+            range_low = col1.slider('Select the range for the scaled values', min_value=0, max_value=100, key='min-max_slider_1')
+            range_high = col1.slider('Select the range for the scaled values', min_value=0, max_value=100, key='min-max_slider_2')
+            scaled_df = hf.scaling(df, scaling_type.lower(), columns_to_scale, range=(range_low, range_high))
+            st.write(scaled_df.head())
+
+        elif columns_to_scale == []:
+            scaled_df = hf.scaling(df, scaling_type.lower())
+            st.write(scaled_df.head())
+
+        else:
+            scaled_df = hf.scaling(df, scaling_type.lower(), columns_to_scale)  
+            st.write(scaled_df.head())
 
         
 

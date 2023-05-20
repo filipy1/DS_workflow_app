@@ -6,7 +6,8 @@ import DS_workflow_helper_functions as hf
 
 
 st.header("""
-        Upload your data for intial preprocessing that includes - \n
+        Initial Data Processing Application  \n
+        Features - \n
         1. Choosing index column\s
         2. Categorical column encoding
         3. Feature type extraction and presentation
