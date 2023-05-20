@@ -8,6 +8,13 @@ Supported features -
 5. Download-able CSV
 
 
+#### Plans for the future
+1. Outlier-detection using basic techniques
+2. Basic visual analysis
+3. Automatic linear regression between continueos variables
+4. Automatic student's T-test between categories
+
+
 
 ### Explanation of streamlit 
 Explanation of Streamlit multipage app usage
