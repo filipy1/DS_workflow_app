@@ -109,10 +109,9 @@ def scaling(df, sclaing_type="min-max", columns=[], range=(0, 1)):
         columns = df.columns
 
     if sclaing_type == "min-max":  ## min-max scaling with flexible range
-        df.loc[:, columns] = (df.loc[:, columns] - df.loc[:, columns].min()) / (
-            (df.loc[:, columns].max() - df.loc[:, columns].min())
-            * (range[1] - range[0])
-        )
+        df_std = (df.loc[:, columns] - df.loc[:, columns].min(axis=0)) / (df.loc[:, columns].max(axis=0) - df.loc[:, columns].min(axis=0))
+        df_scaled = df_std * (range[1] - range[0]) + range[0]
+        df.loc[:, columns] = df_scaled
 
         return df
 
