@@ -9,6 +9,8 @@ from sklearn.impute import SimpleImputer
 import scipy.stats as stats
 
 
+
+## Basic encodoing functions
 def feature_type_extraction(df, index_columns=[0], categorical_columns=[]):
     """This function takes the uploaded file and returns a dictionary with the feature type as the key and the list of column names as the value."""
 
@@ -26,18 +28,6 @@ def feature_type_extraction(df, index_columns=[0], categorical_columns=[]):
     feature_type_df.fillna(np.nan, inplace=True)
 
     return feature_type_df.fillna(np.nan)
-
-
-# @st.cache_data
-def csv_download_button(df):
-    file_name = st.text_input(
-        "Enter the name of the dataframe to be saved as: ", "dataframe"
-    )
-    st.download_button(
-        data=df.to_csv(),
-        label="Download the dataframe as a CSV file",
-        file_name=file_name + ".csv",
-    )
 
 
 def categorical_column_encoding(df, categorical_columns=[], encoding_type="ordinal"):
@@ -60,7 +50,20 @@ def categorical_column_encoding(df, categorical_columns=[], encoding_type="ordin
 
         return df
 
+## Data download
+# @st.cache_data
+def csv_download_button(df):
+    file_name = st.text_input(
+        "Enter the name of the dataframe to be saved as: ", "dataframe"
+    )
+    st.download_button(
+        data=df.to_csv(),
+        label="Download the dataframe as a CSV file",
+        file_name=file_name + ".csv",
+    )
 
+
+### Imputation functions
 def imputation(
     df,
     imputation_type="mean",
@@ -102,7 +105,7 @@ def imputation(
 
         return df
 
-
+### Scaling functions
 def scaling(df, sclaing_type="min-max", columns=[], range=(0, 1)):
     """This function takes the dataframe and a column of categorical data and returns the df with the encoded column."""
 
@@ -139,6 +142,9 @@ def scaling(df, sclaing_type="min-max", columns=[], range=(0, 1)):
         return df
 
 
+
+### Outlier detection functions
+
 def apply_func_checking_IQR_threshold(row, threshold=3, IQR_dict={}):
     """This is a helper function for pandas apply function to check if the value is an outlier."""
 
@@ -157,9 +163,7 @@ def apply_func_checking_IQR_threshold(row, threshold=3, IQR_dict={}):
     return row
 
 
-
-
-def apply_func_checking_Z_threshold(row, threshold=1, z_score_threshold=3, columns=[]):
+def apply_func_checking_Z_threshold(row, threshold=1, z_score_threshold=3):
     """This is a helper function for pandas apply function to check if the value is an outlier."""
 
     outlier_counter = 0
@@ -173,8 +177,7 @@ def apply_func_checking_Z_threshold(row, threshold=1, z_score_threshold=3, colum
     return row
 
 
-        
-    
+##Threshold is the number of columns that need to be outliers for the row to be considered an outlier
 def basic_outlier_detection(df, columns=[], method="Z-Score", iqr_threshold=1.5, z_score_threshold=3, threshold=1, quantile_range=(0.25, 0.75)):
     """This function aims to detect outliers in the dataframe and returns both a dataframe with the outliers removed and a dataframe with the outliers only."""
 
@@ -182,6 +185,7 @@ def basic_outlier_detection(df, columns=[], method="Z-Score", iqr_threshold=1.5,
         columns = list(df.columns)
 
     if method == "IQR":
+        
         df['Outlier'] = 0
         IQR_dict = {}
 
@@ -208,7 +212,7 @@ def basic_outlier_detection(df, columns=[], method="Z-Score", iqr_threshold=1.5,
         for col in columns:
             df[col] = (df[col] - df[col].mean()) / df[col].std()
         
-        df = df.apply(apply_func_checking_Z_threshold, axis=1, args=(threshold, z_score_threshold, columns))
+        df = df.apply(apply_func_checking_Z_threshold, axis=1, args=(threshold, z_score_threshold))
 
         df_outliers = df.loc[df['Outlier'] == 1]
         df_no_outliers = df.loc[df['Outlier'] == 0]

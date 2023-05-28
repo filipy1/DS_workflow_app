@@ -67,7 +67,7 @@ if uploaded_file is not None:  ## If the user has uploaded a file
                 key="IQR_slider_2",
             )   
 
-            threshold = col2.slider("Select minimum number of columns required to be outliers", min_value=1, max_value=len(df.columns), key="IQR_slider_3")
+            threshold = col2.slider("Select minimum number of columns required to be outliers", min_value=0, max_value=len(df.columns), key="IQR_slider_3")
 
             df_no_outliers, outliers_df = hf.basic_outlier_detection(df, columns=list(columns_to_scale), method="IQR", quantile_range=(range_low, range_high), 
                                                                      threshold=threshold)
@@ -76,9 +76,9 @@ if uploaded_file is not None:  ## If the user has uploaded a file
             
             z_score_threshold = col1.slider(
                 "How many standard deviations away from the mean to consider outliers",
-                min_value=0,
+                min_value=1,
                 max_value=10,
-                value = 1,
+                value = 3,
                 key="Z_slider_1",
             )
 
