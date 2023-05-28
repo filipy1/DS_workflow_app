@@ -46,11 +46,8 @@ if uploaded_file is not None:  ## If the user has uploaded a file
         outlier_method = col1.selectbox(
             "Select the outlier detection/removal method", ["IQR", "Z-Score"])
         
-        col2.write(
-            "Remove outliers only by some columns. Taking into account which columns are compatible with which method"
-        )
         columns_to_scale = col2.multiselect(
-            "Select the columns to scale", df.columns
+            "Remove outliers only by some columns. Taking into account which columns are compatible with which method", df.columns
         )  ## We get the columns to scale
 
         if outlier_method == "IQR":
@@ -75,13 +72,27 @@ if uploaded_file is not None:  ## If the user has uploaded a file
             df_no_outliers, outliers_df = hf.basic_outlier_detection(df, columns=list(columns_to_scale), method="IQR", quantile_range=(range_low, range_high), 
                                                                      threshold=threshold)
 
-            col3, col4 = st.columns(2)
+        if outlier_method == "Z-Score":
+            
+            z_score_threshold = col1.slider(
+                "How many standard deviations away from the mean to consider outliers",
+                min_value=0,
+                max_value=10,
+                value = 1,
+                key="Z_slider_1",
+            )
 
-            col3.write(df_no_outliers)
-            col3.write(df_no_outliers.describe())
+            threshold = col2.slider("Select minimum number of columns required to be outliers", min_value=1, max_value=len(df.columns), key="IQR_slider_3")
 
-            col4.write(outliers_df.head())
-            col4.write(outliers_df.describe())
+            df_no_outliers, outliers_df = hf.basic_outlier_detection(df, columns=list(columns_to_scale), method="Z-Score", threshold=threshold, z_score_threshold=z_score_threshold)
+
+        col3, col4 = st.columns(2)
+
+        col3.write(df_no_outliers)
+        col3.write(df_no_outliers.describe())
+
+        col4.write(outliers_df.head())
+        col4.write(outliers_df.describe())
     ## We catch the errors and present them to the user
     except ValueError as v:
         st.error(v)
