@@ -6,6 +6,7 @@ from sklearn.impute import KNNImputer
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 from sklearn.impute import SimpleImputer
+import scipy.stats as stats
 
 
 def feature_type_extraction(df, index_columns=[0], categorical_columns=[]):
@@ -127,12 +128,65 @@ def scaling(df, sclaing_type="min-max", columns=[], range=(0, 1)):
 
         return df
 
-    if sclaing_type == "robust":  ## robust scaling
+    if sclaing_type == "robust":  ## robust scaling using IQR
         df.loc[:, columns] = (df.loc[:, columns] - df.loc[:, columns].median()) / (
             df.loc[:, columns].quantile(0.75) - df.loc[:, columns].quantile(0.25)
         )
 
         return df
+
+    else:
+        return df
+
+
+def apply_func_checking_threshold(row, threshold=3, IQR_dict={}):
+    """This is a helper function for pandas apply function to check if the value is an outlier."""
+
+    if IQR_dict == {}:
+        raise ValueError("No columns provided")
+
+    outlier_col_count = 0
+    for key in IQR_dict.keys():
+        if row[key] < IQR_dict[key][0] or row[key] > IQR_dict[key][1]:
+            outlier_col_count += 1
+    
+        if outlier_col_count > threshold:
+            row['Outlier'] = 1
+            return row
+
+    return row
+        
+    
+def basic_outlier_detection(df, columns=[], method="Z-Score", iqr_threshold=1.5, threshold=3, quantile_range=(0.25, 0.75)):
+    """This function aims to detect outliers in the dataframe and returns both a dataframe with the outliers removed and a dataframe with the outliers only."""
+
+    if columns == []:
+        columns = df.columns
+
+    if method == "IQR":
+        df['Outlier'] = 0
+        IQR_dict = {}
+        for col in columns:
+                IQR = df[col].quantile(quantile_range[1]) - df[col].quantile(quantile_range[0])
+                lower_bound = df[col].quantile(quantile_range[0]) - (iqr_threshold * IQR)
+                upper_bound = df[col].quantile(quantile_range[1]) + (iqr_threshold * IQR)
+                IQR_dict[col] = (lower_bound, upper_bound)
+
+        df = df.apply(apply_func_checking_threshold, axis=1, args=(threshold, IQR_dict))
+        df_outliers = df.loc[df['Outlier'] == 1]
+        df_no_outliers = df.loc[df['Outlier'] == 0]
+
+        df_outliers.drop(columns=['Outlier'], inplace=True)
+        df_no_outliers.drop(columns=['Outlier'], inplace=True)
+
+        return df_no_outliers, df_outliers
+    
+    if method == "Z-Score":
+        df_outliers = df.loc[(np.abs(stats.zscore(df.loc[:, columns])) > threshold).any(axis=1)]
+        df_no_outliers = df.loc[(np.abs(stats.zscore(df.loc[:, columns])) <= threshold).all(axis=1)]
+
+        return df_no_outliers, df_outliers
+
 
     else:
         return df

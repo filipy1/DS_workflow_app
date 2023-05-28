@@ -41,7 +41,47 @@ if uploaded_file is not None:  ## If the user has uploaded a file
         col2.write(df.describe(include="all"))
 
         ## Outlier detection/removal methods
+        st.subheader("""Outlier detection/removal methods""")
+        col1, col2 = st.columns(2)
+        outlier_method = col1.selectbox(
+            "Select the outlier detection/removal method", ["IQR", "Z-Score"])
+        
+        col2.write(
+            "Remove outliers only by some columns. Taking into account which columns are compatible with which method"
+        )
+        columns_to_scale = col2.multiselect(
+            "Select the columns to scale", df.columns
+        )  ## We get the columns to scale
 
+        if outlier_method == "IQR":
+
+            range_low = col1.slider(
+                "Select the lower bound of the range to consider outliers",
+                min_value=0.0,
+                max_value=1.0,
+                value = 0.25,
+                key="IQR_slider_1",
+            )
+            range_high = col1.slider(
+                "Select the upper bound of the range to consider outliers",
+                min_value=0.0,
+                max_value=1.0,
+                value = 0.75,
+                key="IQR_slider_2",
+            )   
+
+            threshold = col2.slider("Select minimum number of columns required to be outliers", min_value=1, max_value=len(df.columns), key="IQR_slider_3")
+
+            df_no_outliers, outliers_df = hf.basic_outlier_detection(df, columns=list(columns_to_scale), method="IQR", quantile_range=(range_low, range_high), 
+                                                                     threshold=threshold)
+
+            col3, col4 = st.columns(2)
+
+            col3.write(df_no_outliers)
+            col3.write(df_no_outliers.describe())
+
+            col4.write(outliers_df.head())
+            col4.write(outliers_df.describe())
     ## We catch the errors and present them to the user
     except ValueError as v:
         st.error(v)
