@@ -265,7 +265,10 @@ def t_tests(test_df, paired=False, alpha=0.05, alternative="two-sided", correcti
         t_test_results = pg.ttest(test_df.iloc[:,0], test_df.iloc[:, 1], paired=paired, correction=correction, alternative=alternative)
         return t_test_results
 
-    # return t_test_results
+    if pairwise==True:
+
+        t_test_results = pg.ptests(test_df, paired=paired, decimals=3, stars=False)
+        return t_test_results
 
 
 

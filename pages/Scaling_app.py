@@ -63,7 +63,7 @@ if uploaded_file is not None:  ## If the user has uploaded a file
                 key="min-max_slider_1",
             )
             range_high = col1.slider(
-                "Select the upper bound for the scaled value",
+                "Select the upper bound for the scaled values",
                 min_value=0,
                 max_value=100,
                 key="min-max_slider_2",
