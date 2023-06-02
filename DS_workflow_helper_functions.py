@@ -267,9 +267,17 @@ def t_tests(test_df, paired=False, alpha=0.05, alternative="two-sided", correcti
 
     if pairwise==True:
 
-        t_test_results = pg.ptests(test_df, paired=paired, decimals=3, stars=False)
+        t_test_results = pg.ptests(test_df, paired=paired, decimals=3, stars=False, padjust='bonf')
         return t_test_results
 
 
 
+def non_parametric_tests(test_df, alternative='two-sided', test='Mann-Whitney'):
+    """"""
+    if test == 'Mann-Whitney':
+        test_results = pg.mwu(test_df.iloc[:,0], test_df.iloc[:, 1], alternative=alternative)
+        return test_results
     
+    if test == 'Wilcoxon':
+        test_results = pg.wilcoxon(test_df.iloc[:,0], test_df.iloc[:, 1], alternative=alternative)
+        return test_results

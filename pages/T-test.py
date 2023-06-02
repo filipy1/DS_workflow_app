@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from plotly.subplots import make_subplots
 import DS_workflow_helper_functions as hf
 
 
@@ -46,7 +45,6 @@ if uploaded_file is not None:  ## If the user has uploaded a file
         col1.write(df.head())
         col2.write(df.describe(include="all"))
 
-        ## Outlier detection/removal methods
         st.subheader("T-tests")
         
         col3, col4 = st.columns(2)
@@ -98,7 +96,10 @@ if uploaded_file is not None:  ## If the user has uploaded a file
             try:
                 t_test_results = hf.t_tests(df.loc[:, test_cols], paired=paired, pairwise=True)
                 st.subheader("T-test results")
-                st.write("The top triangle is the P values, the bottom triangle is the T values for each pair of columns")
+                st.write("""
+                            The top triangle is the P values, the bottom triangle is the T values for each pair of columns. \n
+                            P-values are corrected using the Bonferroni correction
+                            """)
                 st.write(t_test_results)
             except ValueError as e:
                 st.error("Please select at least 2 columns to be compared")
