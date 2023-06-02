@@ -7,7 +7,7 @@ from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 from sklearn.impute import SimpleImputer
 import scipy.stats as stats
-
+import pingouin as pg
 
 
 ## Basic encodoing functions
@@ -50,17 +50,32 @@ def categorical_column_encoding(df, categorical_columns=[], encoding_type="ordin
 
         return df
 
+
 ## Data download
 # @st.cache_data
-def csv_download_button(df):
-    file_name = st.text_input(
-        "Enter the name of the dataframe to be saved as: ", "dataframe"
-    )
-    st.download_button(
-        data=df.to_csv(),
-        label="Download the dataframe as a CSV file",
-        file_name=file_name + ".csv",
-    )
+def csv_download_button(df, text="Enter the name of the dataframe to be saved as: ", col=None):
+
+    if col:
+        file_name = col.text_input(
+        text, "dataframe",
+        key=f'{col}-text-input'
+        )
+        col.download_button(
+            data=df.to_csv(),
+            label="Download the dataframe as a CSV file",
+            file_name=file_name + ".csv",
+            key = f'{col}-download-button'
+        )
+
+    else:
+        file_name = st.text_input(
+            text, "dataframe"
+        )
+        st.download_button(
+            data=df.to_csv(),
+            label="Download the dataframe as a CSV file",
+            file_name=file_name + ".csv",
+        )
 
 
 ### Imputation functions
@@ -98,12 +113,13 @@ def imputation(
             imputation_order=imp_order,
         )
         imputed = iter_imp.fit_transform(df)
-        df = pd.DataFrame(imputed, columns=df.columns)
+        df = pd.DataFrame(imputed, columns=df.columns).set_index(df.index)
 
         return df
     else:
 
         return df
+
 
 ### Scaling functions
 def scaling(df, sclaing_type="min-max", columns=[], range=(0, 1)):
@@ -113,7 +129,9 @@ def scaling(df, sclaing_type="min-max", columns=[], range=(0, 1)):
         columns = df.columns
 
     if sclaing_type == "min-max":  ## min-max scaling with flexible range
-        df_std = (df.loc[:, columns] - df.loc[:, columns].min(axis=0)) / (df.loc[:, columns].max(axis=0) - df.loc[:, columns].min(axis=0))
+        df_std = (df.loc[:, columns] - df.loc[:, columns].min(axis=0)) / (
+            df.loc[:, columns].max(axis=0) - df.loc[:, columns].min(axis=0)
+        )
         df_scaled = df_std * (range[1] - range[0]) + range[0]
         df.loc[:, columns] = df_scaled
 
@@ -142,8 +160,8 @@ def scaling(df, sclaing_type="min-max", columns=[], range=(0, 1)):
         return df
 
 
-
 ### Outlier detection functions
+
 
 def apply_func_checking_IQR_threshold(row, threshold=3, IQR_dict={}):
     """This is a helper function for pandas apply function to check if the value is an outlier."""
@@ -155,9 +173,9 @@ def apply_func_checking_IQR_threshold(row, threshold=3, IQR_dict={}):
     for key in IQR_dict.keys():
         if row[key] < IQR_dict[key][0] or row[key] > IQR_dict[key][1]:
             outlier_col_count += 1
-    
+
         if outlier_col_count >= threshold:
-            row['Outlier'] = 1
+            row["Outlier"] = 1
             return row
 
     return row
@@ -167,60 +185,88 @@ def apply_func_checking_Z_threshold(row, threshold=1, z_score_threshold=3):
     """This is a helper function for pandas apply function to check if the value is an outlier."""
 
     outlier_counter = 0
-    for i in (row.index):
+    for i in row.index:
         if row[i] >= z_score_threshold or row[i] <= -z_score_threshold:
-            outlier_counter +=1
-    
+            outlier_counter += 1
+
     if outlier_counter >= threshold:
-        row['Outlier'] = 1
+        row["Outlier"] = 1
         return row
     return row
 
 
 ##Threshold is the number of columns that need to be outliers for the row to be considered an outlier
-def basic_outlier_detection(df, columns=[], method="Z-Score", iqr_threshold=1.5, z_score_threshold=3, threshold=1, quantile_range=(0.25, 0.75)):
+def basic_outlier_detection(
+    df,
+    columns=[],
+    method="Z-Score",
+    iqr_threshold=1.5,
+    z_score_threshold=3,
+    threshold=1,
+    quantile_range=(0.25, 0.75),
+):
     """This function aims to detect outliers in the dataframe and returns both a dataframe with the outliers removed and a dataframe with the outliers only."""
 
     if columns == []:
         columns = list(df.columns)
 
     if method == "IQR":
-        
-        df['Outlier'] = 0
+
+        df["Outlier"] = 0
         IQR_dict = {}
 
         for col in columns:
-                IQR = df[col].quantile(quantile_range[1]) - df[col].quantile(quantile_range[0])
-                lower_bound = df[col].quantile(quantile_range[0]) - (iqr_threshold * IQR)
-                upper_bound = df[col].quantile(quantile_range[1]) + (iqr_threshold * IQR)
-                IQR_dict[col] = (lower_bound, upper_bound)
+            IQR = df[col].quantile(quantile_range[1]) - df[col].quantile(
+                quantile_range[0]
+            )
+            lower_bound = df[col].quantile(quantile_range[0]) - (iqr_threshold * IQR)
+            upper_bound = df[col].quantile(quantile_range[1]) + (iqr_threshold * IQR)
+            IQR_dict[col] = (lower_bound, upper_bound)
 
-        df = df.apply(apply_func_checking_IQR_threshold, axis=1, args=(threshold, IQR_dict))
-        df_outliers = df.loc[df['Outlier'] == 1]
-        df_no_outliers = df.loc[df['Outlier'] == 0]
+        df = df.apply(
+            apply_func_checking_IQR_threshold, axis=1, args=(threshold, IQR_dict)
+        )
+        df_outliers = df.loc[df["Outlier"] == 1]
+        df_no_outliers = df.loc[df["Outlier"] == 0]
 
-        df_outliers.drop(columns=['Outlier'], inplace=True)
-        df_no_outliers.drop(columns=['Outlier'], inplace=True)
+        df_outliers.drop(columns=["Outlier"], inplace=True)
+        df_no_outliers.drop(columns=["Outlier"], inplace=True)
 
         return df_no_outliers, df_outliers
-    
 
     if method == "Z-Score":
 
-        df['Outlier'] = 0
+        df["Outlier"] = 0
 
         for col in columns:
             df[col] = (df[col] - df[col].mean()) / df[col].std()
-        
-        df = df.apply(apply_func_checking_Z_threshold, axis=1, args=(threshold, z_score_threshold))
 
-        df_outliers = df.loc[df['Outlier'] == 1]
-        df_no_outliers = df.loc[df['Outlier'] == 0]
+        df = df.apply(
+            apply_func_checking_Z_threshold, axis=1, args=(threshold, z_score_threshold)
+        )
 
-        df_outliers.drop(columns=['Outlier'], inplace=True)
-        df_no_outliers.drop(columns=['Outlier'], inplace=True)
+        df_outliers = df.loc[df["Outlier"] == 1]
+        df_no_outliers = df.loc[df["Outlier"] == 0]
+
+        df_outliers.drop(columns=["Outlier"], inplace=True)
+        df_no_outliers.drop(columns=["Outlier"], inplace=True)
 
         return df_no_outliers, df_outliers
-    
+
     else:
         return df
+
+
+### Statistical tests functions
+
+def t_tests(test_df, paired=False, alpha=0.05, alternative="two-sided", correction=False, pairwise=False):
+    """"""
+    if pairwise==False:
+        t_test_results = pg.ttest(test_df.iloc[:,0], test_df.iloc[:, 1], paired=paired, correction=correction, alternative=alternative)
+        return t_test_results
+
+    # return t_test_results
+
+
+
+    

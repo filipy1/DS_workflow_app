@@ -57,13 +57,13 @@ if uploaded_file is not None:  ## If the user has uploaded a file
 
         if scaling_type.lower() == "min-max":
             range_low = col1.slider(
-                "Select the range for the scaled values",
+                "Select the lower bound for the scaled values",
                 min_value=0,
                 max_value=100,
                 key="min-max_slider_1",
             )
             range_high = col1.slider(
-                "Select the range for the scaled values",
+                "Select the upper bound for the scaled value",
                 min_value=0,
                 max_value=100,
                 key="min-max_slider_2",
