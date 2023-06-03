@@ -53,24 +53,21 @@ def categorical_column_encoding(df, categorical_columns=[], encoding_type="ordin
 
 ## Data download
 # @st.cache_data
-def csv_download_button(df, text="Enter the name of the dataframe to be saved as: ", col=None):
+def csv_download_button(
+    df, text="Enter the name of the dataframe to be saved as: ", col=None
+):
 
     if col:
-        file_name = col.text_input(
-        text, "dataframe",
-        key=f'{col}-text-input'
-        )
+        file_name = col.text_input(text, "dataframe", key=f"{col}-text-input")
         col.download_button(
             data=df.to_csv(),
             label="Download the dataframe as a CSV file",
             file_name=file_name + ".csv",
-            key = f'{col}-download-button'
+            key=f"{col}-download-button",
         )
 
     else:
-        file_name = st.text_input(
-            text, "dataframe"
-        )
+        file_name = st.text_input(text, "dataframe")
         st.download_button(
             data=df.to_csv(),
             label="Download the dataframe as a CSV file",
@@ -259,25 +256,45 @@ def basic_outlier_detection(
 
 ### Statistical tests functions
 
-def t_tests(test_df, paired=False, alpha=0.05, alternative="two-sided", correction=False, pairwise=False):
-    """"""
-    if pairwise==False:
-        t_test_results = pg.ttest(test_df.iloc[:,0], test_df.iloc[:, 1], paired=paired, correction=correction, alternative=alternative)
+
+def t_tests(
+    test_df,
+    paired=False,
+    alpha=0.05,
+    alternative="two-sided",
+    correction=False,
+    pairwise=False,
+):
+    """Function to be used for t-tests. If pairwise is set to True, then the function will perform pairwise t-tests for all columns in the dataframe."""
+    if pairwise == False:
+        t_test_results = pg.ttest(
+            test_df.iloc[:, 0],
+            test_df.iloc[:, 1],
+            paired=paired,
+            correction=correction,
+            alternative=alternative,
+        )
         return t_test_results
 
-    if pairwise==True:
+    if pairwise == True:
 
-        t_test_results = pg.ptests(test_df, paired=paired, decimals=3, stars=False, padjust='bonf')
+        t_test_results = pg.ptests(
+            test_df, paired=paired, decimals=3, stars=False, padjust="bonf"
+        )
         return t_test_results
 
 
-
-def non_parametric_tests(test_df, alternative='two-sided', test='Mann-Whitney'):
-    """"""
-    if test == 'Mann-Whitney':
-        test_results = pg.mwu(test_df.iloc[:,0], test_df.iloc[:, 1], alternative=alternative)
-        return test_results
+def non_parametric_tests(test_df, alternative="two-sided", test="Mann-Whitney"):
+    """Function to be used for non-parametric tests. Currently supports Mann-Whitney and Wilcoxon tests."""
     
-    if test == 'Wilcoxon':
-        test_results = pg.wilcoxon(test_df.iloc[:,0], test_df.iloc[:, 1], alternative=alternative)
+    if test == "Mann-Whitney":
+        test_results = pg.mwu(
+            test_df.iloc[:, 0], test_df.iloc[:, 1], alternative=alternative
+        )
+        return test_results
+
+    if test == "Wilcoxon":
+        test_results = pg.wilcoxon(
+            test_df.iloc[:, 0], test_df.iloc[:, 1], alternative=alternative
+        )
         return test_results

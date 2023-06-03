@@ -1,4 +1,4 @@
-# Basuc data preprocessing app
+# Basic data preprocessing app
 ### The aim of this application is to quicken the basic preprocessing of data before using it for ML/analysis purposes
 Supported features - 
 1. Categorical data encoding

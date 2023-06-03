@@ -4,8 +4,9 @@ import plotly.express as px
 import DS_workflow_helper_functions as hf
 
 
-st.header("""
-        Upload your data to perform a Student's T-test - \n
+st.header(
+    """
+        Upload your data to perform a Student's T-test \n
         1. Optional pairwise T-test on the whole dataframe
         2. Paired/Unpaired T-test on 2 columns
         3. Displaying results as a table \n
@@ -14,7 +15,8 @@ st.header("""
         * The mean of the data is normally distributed \n
         * The data is approximately normally distributed \n
         * Equal sample sizes and variance between groups being compared  \n
-        """)
+        """
+)
 
 
 t_test_results = pd.DataFrame()
@@ -46,14 +48,22 @@ if uploaded_file is not None:  ## If the user has uploaded a file
         col2.write(df.describe(include="all"))
 
         st.subheader("T-tests")
-        
+
         col3, col4 = st.columns(2)
         col3.write("T-test selection")
-        
+
         pairwise = col3.radio("Pairwise T-test on whole data-frame?", ["Yes", "No"])
 
-        if pairwise == 'No': ## If the user wants to perform a T-test on the whole dataframe
-            alpha = st.number_input("Select the significance level", min_value=0.0, max_value=1.0, value=0.05, step=0.01)
+        if (
+            pairwise == "No"
+        ):  ## If the user wants to perform a T-test on the whole dataframe
+            alpha = st.number_input(
+                "Select the significance level",
+                min_value=0.0,
+                max_value=1.0,
+                value=0.05,
+                step=0.01,
+            )
             t_type = col3.radio("Select the type of T-test", ["Unpaired", "Paired"])
 
             if t_type == "Paired":
@@ -61,28 +71,35 @@ if uploaded_file is not None:  ## If the user has uploaded a file
             else:
                 paired = False
 
-            test_cols = col4.multiselect("Select 2 columns to be compared", df.columns, max_selections=2)
-            test_df = df.loc[:, test_cols]  
+            test_cols = col4.multiselect(
+                "Select 2 columns to be compared", df.columns, max_selections=2
+            )
+            test_df = df.loc[:, test_cols]
             if len(test_cols) < 2:
                 st.error(f"{t_type} T-test can only be performed on 2 columns")
 
             try:
-                t_test_results = hf.t_tests(test_df, paired=paired, pairwise=False, alpha=alpha)
+                t_test_results = hf.t_tests(
+                    test_df, paired=paired, pairwise=False, alpha=alpha
+                )
                 st.subheader("T-test results")
                 st.write(t_test_results)
 
                 col_1_hist = px.histogram(data_frame=df, x=test_cols[0], height=250)
                 col_2_hist = px.histogram(data_frame=df, x=test_cols[1], height=250)
 
-
                 st.subheader("Histograms of the 2 columns")
-                st.plotly_chart(col_1_hist, use_container_width=True, )
+                st.plotly_chart(
+                    col_1_hist,
+                    use_container_width=True,
+                )
                 st.plotly_chart(col_2_hist)
             except IndexError as e:
                 pass
 
-        
-        if pairwise == 'Yes': ## If the user wants to perform a pairwise T-test on the whole dataframe
+        if (
+            pairwise == "Yes"
+        ):  ## If the user wants to perform a pairwise T-test on the whole dataframe
 
             t_type = col3.radio("Select the type of T-test", ["Unpaired", "Paired"])
 
@@ -94,12 +111,16 @@ if uploaded_file is not None:  ## If the user has uploaded a file
             test_cols = col4.multiselect("Select columns to be compared", df.columns)
 
             try:
-                t_test_results = hf.t_tests(df.loc[:, test_cols], paired=paired, pairwise=True)
+                t_test_results = hf.t_tests(
+                    df.loc[:, test_cols], paired=paired, pairwise=True
+                )
                 st.subheader("T-test results")
-                st.write("""
+                st.write(
+                    """
                             The top triangle is the P values, the bottom triangle is the T values for each pair of columns. \n
                             P-values are corrected using the Bonferroni correction
-                            """)
+                            """
+                )
                 st.write(t_test_results)
             except ValueError as e:
                 st.error("Please select at least 2 columns to be compared")
@@ -110,6 +131,8 @@ if uploaded_file is not None:  ## If the user has uploaded a file
 
     try:
         ## We download the dataframe as a CSV file
-        hf.csv_download_button(t_test_results, "Download the T-test results as a CSV file")
-    except NameError as e:  
+        hf.csv_download_button(
+            t_test_results, "Download the T-test results as a CSV file"
+        )
+    except NameError as e:
         st.error(e)

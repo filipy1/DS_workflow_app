@@ -3,7 +3,8 @@ import pandas as pd
 import DS_workflow_helper_functions as hf
 
 
-st.header("""
+st.header(
+    """
         Upload your data for an Outlier-Detection process - \n
         1. IQR Outlier detection
         2. Z-Score Outlier detection
@@ -11,7 +12,8 @@ st.header("""
         4. KNN imputation
         5. The scikit-learn experimental IterativeImputer
         6. Summary statistics of the dataframe after the process
-        7. Download the modified dataframe as a CSV file pages""")
+        7. Download the modified dataframe as a CSV file pages"""
+)
 
 
 st.subheader("Upload your data")
@@ -114,7 +116,7 @@ if uploaded_file is not None:  ## If the user has uploaded a file
         col3.write("Datafarme after outlier removal")
         col3.write(df_no_outliers)
         col3.write(df_no_outliers.describe())
-    
+
         col4.write("Outliers dataframe")
         col4.write(outliers_df)
         col4.write(outliers_df.describe())
@@ -125,7 +127,9 @@ if uploaded_file is not None:  ## If the user has uploaded a file
     try:
         ## We download the dataframe as a CSV file
         col5, col6 = st.columns(2)
-        hf.csv_download_button(df_no_outliers, "Download the dataframe after outlier removal", col5)
+        hf.csv_download_button(
+            df_no_outliers, "Download the dataframe after outlier removal", col5
+        )
         hf.csv_download_button(outliers_df, "Download the outliers dataframe", col6)
-    except NameError as e:  
+    except NameError as e:
         st.error(e)

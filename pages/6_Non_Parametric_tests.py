@@ -1,22 +1,23 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from plotly.subplots import make_subplots
 import DS_workflow_helper_functions as hf
 
 
 t_test_results = pd.DataFrame()
 
 
-st.header("""
-        Upload your data to perform a non-parametric test - \n
+st.header(
+    """
+        Upload your data to perform a non-parametric test  \n
         1. Wilcoxon test for paired data
         2. Mann-Whitney test for unpaired data
         
         Assumptions of the tests: \n
         * The distributions of the 2 groups are similar \n
         
-        """)
+        """
+)
 
 
 st.subheader("Upload your data")
@@ -50,15 +51,17 @@ if uploaded_file is not None:  ## If the user has uploaded a file
 
         col3, col4 = st.columns(2)
         col3.write("Test selection")
-        
-        pairwise = col3.radio("Pairwise test on whole data-frame?", ["Yes", "No"])
 
-        if pairwise == 'No':
+        pairwise = col3.radio("Pairwise test on whole data-frame?", ["Yes", "No"]) ## Pairwise means 
+
+        if pairwise == "No":
 
             t_type = col3.radio("Select the type of test", ["Mann-Whitney", "Wilcoxon"])
 
-            test_cols = col4.multiselect("Select 2 columns to be compared", df.columns, max_selections=2)
-            test_df = df.loc[:, test_cols]  
+            test_cols = col4.multiselect(
+                "Select 2 columns to be compared", df.columns, max_selections=2
+            )
+            test_df = df.loc[:, test_cols]
             if len(test_cols) < 2:
                 st.error(f"{t_type} test can only be performed on 2 columns")
 
@@ -71,11 +74,17 @@ if uploaded_file is not None:  ## If the user has uploaded a file
                 col_2_hist = px.histogram(data_frame=df, x=test_cols[1], height=250)
 
                 st.subheader("Histograms of the 2 columns")
-                st.plotly_chart(col_1_hist, use_container_width=True, )
+                st.plotly_chart(
+                    col_1_hist,
+                    use_container_width=True,
+                )
                 st.plotly_chart(col_2_hist)
             except IndexError as e:
                 pass
 
+        if pairwise == "Yes":
+
+            st.error("Sorry but pairwise test not implemented yet")
 
     ## We catch the errors and present them to the user
     except ValueError as v:
@@ -83,6 +92,8 @@ if uploaded_file is not None:  ## If the user has uploaded a file
 
     try:
         ## We download the dataframe as a CSV file
-        hf.csv_download_button(t_test_results, "Download the test results as a CSV file")
-    except NameError as e:  
+        hf.csv_download_button(
+            t_test_results, "Download the test results as a CSV file"
+        )
+    except NameError as e:
         st.error(e)
