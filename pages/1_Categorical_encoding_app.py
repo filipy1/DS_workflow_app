@@ -34,9 +34,13 @@ if uploaded_file is not None:  ## If the user has uploaded a file
     try:
         ## We create a dataframe with the feature type and old vs new name, also we renamed the columns for consistency later on.
         idx_cols = st.multiselect("Select the index columns", df.columns)
-
-        df.set_index(idx_cols, inplace=True, drop=True)
-
+        if idx_cols == []:
+            idx_col = pd.Series(df.index, name="index")
+            df.set_index(idx_col, inplace=True)
+            df.reset_index(inplace=True)
+        else:
+            df.set_index(idx_cols, inplace=True, drop=True)
+        
         ## We encode the categorical columns
         cat_lst = st.multiselect(
             "Select the categorical columns",
@@ -56,8 +60,11 @@ if uploaded_file is not None:  ## If the user has uploaded a file
         one_h_lst = col2.multiselect(
             "Select the categorical columns to be one-hot-encoded", cat_lst
         )
-
-        index_cols = feature_type_df["Index"].dropna().tolist()
+        try:
+            index_cols = feature_type_df["Index"].dropna().tolist()
+        except:
+            pass 
+        
         numeric_cols = feature_type_df["Numeric"].dropna().tolist()
         categorical_cols = feature_type_df["Categorical/Ordinal"].dropna().tolist()
 
@@ -78,6 +85,7 @@ if uploaded_file is not None:  ## If the user has uploaded a file
 
     ## We catch the errors and present them to the user
     except ValueError as v:
+        v
         st.error(v)
 
     try:

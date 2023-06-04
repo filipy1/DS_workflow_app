@@ -19,12 +19,16 @@ def feature_type_extraction(df, index_columns=[0], categorical_columns=[]):
     indexes = pd.DataFrame(index_columns)
     numer = pd.DataFrame(list(df.select_dtypes(include=["float64", "int64"]).columns))
     numer.replace(index_columns + categorical_columns, np.nan, inplace=True)
+
     cate = pd.DataFrame(categorical_columns).drop_duplicates()
     if len(categorical_columns) == 0:
         cate = pd.DataFrame([np.nan for i in range(len(numer))])
 
     feature_type_df = pd.concat((indexes, numer, cate), axis=1, ignore_index=True)
-    feature_type_df.columns = ["Index", "Numeric", "Categorical/Ordinal"]
+    try:
+        feature_type_df.columns = ["Index", "Numeric", "Categorical/Ordinal"]
+    except:
+        feature_type_df.columns = ["Numeric", "Categorical/Ordinal"]
     feature_type_df.fillna(np.nan, inplace=True)
 
     return feature_type_df.fillna(np.nan)

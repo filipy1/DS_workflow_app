@@ -37,6 +37,8 @@ if uploaded_file is not None:  ## If the user has uploaded a file
 
     try:
         idx_cols = st.multiselect("Select the index columns", df.columns)
+        if idx_cols == []:
+            idx_cols = pd.Series(df.index, name="index")
         df.set_index(idx_cols, inplace=True, drop=True)
         ## present the dataframe
         st.subheader(

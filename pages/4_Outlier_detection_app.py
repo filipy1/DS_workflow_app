@@ -33,6 +33,8 @@ if uploaded_file is not None:  ## If the user has uploaded a file
 
     try:
         idx_cols = st.multiselect("Select the index columns", df.columns)
+        if idx_cols == []:
+            idx_cols = pd.Series(df.index, name="index")
         df.set_index(idx_cols, inplace=True, drop=True)
         ## present the dataframe
         st.subheader(
@@ -121,8 +123,8 @@ if uploaded_file is not None:  ## If the user has uploaded a file
         col4.write(outliers_df)
         col4.write(outliers_df.describe())
     ## We catch the errors and present them to the user
-    except ValueError as v:
-        st.error(v)
+    except BaseException as e:
+        st.error("Error - file is unsuitable for the process")
 
     try:
         ## We download the dataframe as a CSV file
@@ -132,4 +134,4 @@ if uploaded_file is not None:  ## If the user has uploaded a file
         )
         hf.csv_download_button(outliers_df, "Download the outliers dataframe", col6)
     except NameError as e:
-        st.error(e)
+        st.error("Error - dataframe is unsuitable for the download")

@@ -40,6 +40,8 @@ if uploaded_file is not None:  ## If the user has uploaded a file
 
         ## Index column selection
         idx_cols = st.multiselect("Select the index columns", df.columns)
+        if idx_cols == []:
+            idx_cols = pd.Series(df.index, name="index")
         df.set_index(idx_cols, inplace=True, drop=True)
         ## present the dataframe
         st.subheader(
@@ -85,7 +87,7 @@ if uploaded_file is not None:  ## If the user has uploaded a file
         )
 
         if len(knn_impute) > 0:
-            knn_k = col4.slider(
+            knn_k = col4.number_input(
                 "Select the number of nearest neighbors",
                 min_value=1,
                 max_value=len(df.index),
